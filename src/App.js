@@ -1,5 +1,5 @@
-import React from 'react';
 import './App.css';
+import React, { useState, useEffect } from 'react';
 
 
 const schedule = {
@@ -29,6 +29,8 @@ const schedule = {
 };
 const terms = { F: 'Fall', W: 'Winter', S: 'Spring'};
 
+
+
 const getCourseTerm = course => (
   terms[course.id.charAt(0)]
 );
@@ -37,12 +39,29 @@ const getCourseNumber = course => (
   course.id.slice(1, 4)
 );
 
-const App = () =>  (
-  <div className="container">
-    <Banner title={ schedule.title } />
-    <CourseList courses={ schedule.courses } />
-  </div>
-);
+const App = () => {
+  const [schedule, setSchedule] = useState();
+  const url = 'https://courses.cs.northwestern.edu/394/data/cs-courses.php';
+
+  useEffect(() => {
+    const fetchSchedule = async () => {
+      const response = await fetch(url);
+      if (!response.ok) throw response;
+      const json = await response.json();
+      setSchedule(json);
+    }
+    fetchSchedule();
+  }, [])
+
+  if (!schedule) return <h1>Loading schedule...</h1>;
+
+  return (
+    <div className="container">
+      <Banner title={ schedule.title } />
+      <CourseList courses={ schedule.courses } />
+    </div>
+  );
+};
 
 const Banner = ({ title }) => (
   <h1>{ title }</h1>
@@ -63,5 +82,7 @@ const Course = ({ course }) => (
     </div>
   </div>
 );
+
+
 
 export default App;
